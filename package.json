@@ -9,12 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.1.1",
     "@google/genai": "^1.21.0",
+    "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "recharts": "^3.2.1"
   },
   "devDependencies": {
+    "@dyad-sh/react-vite-component-tagger": "^0.8.0",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
