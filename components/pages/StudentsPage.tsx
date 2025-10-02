@@ -43,6 +43,9 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ students, setStudent
       const newStudent: Student = {
         id: new Date().toISOString(),
         name: studentName.trim(),
+        cpf: '',
+        login: '',
+        simulados: [],
       };
       setStudents([...students, newStudent]);
       showToast('Aluno adicionado com sucesso!', 'success');
