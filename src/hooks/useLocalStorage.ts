@@ -1,7 +1,7 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 
 // A simple hook for persisting state to localStorage
-export const useLocalStorage = <T,>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] => {
+export const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -12,7 +12,7 @@ export const useLocalStorage = <T,>(key: string, initialValue: T): [T, Dispatch<
     }
   });
 
-  const setValue: Dispatch<SetStateAction<T>> = (value) => {
+  const setValue: React.Dispatch<React.SetStateAction<T>> = (value) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
