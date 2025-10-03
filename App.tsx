@@ -16,6 +16,7 @@ import { StudentLayout } from './components/StudentLayout';
 import { StudentDashboardPage } from './components/pages/StudentDashboardPage';
 import { Spinner } from './components/common/Spinner';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
+import { initialStudents } from './src/data/initialStudents';
 
 type ActivePage = string | { page: string; [key: string]: any };
 
@@ -25,7 +26,7 @@ const App = () => {
     const [loading, setLoading] = useState(true);
 
     const [activePage, setActivePage] = useState<ActivePage>('dashboard');
-    const [students, setStudents] = useLocalStorage<Student[]>('students', []);
+    const [students, setStudents] = useLocalStorage<Student[]>('students', initialStudents);
     const [simulados, setSimulados] = useLocalStorage<Simulado[]>('simulados', []);
     const [corrections, setCorrections] = useLocalStorage<CorrectionResult[]>('corrections', []);
     const [correcoesRedacao, setCorrecoesRedacao] = useLocalStorage<CorrecaoRedacao[]>('correcoesRedacao', []);
