@@ -70,4 +70,5 @@ export interface Student {
   login: string;
   password?: string;
   simulados: Simulado[];
+  authId?: string;
 }
