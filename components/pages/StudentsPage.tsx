@@ -3,7 +3,7 @@ import { Card } from '../common/Card';
 import { Modal } from '../common/Modal';
 import { Student } from '../../types';
 import { UsersIcon, PlusCircleIcon, Trash2Icon, EditIcon } from '../Icons';
-import { supabase } from '../../integrations/supabase/client';
+import { supabase } from '../../src/integrations/supabase/client';
 import { Spinner } from '../common/Spinner';
 
 interface StudentsPageProps {
