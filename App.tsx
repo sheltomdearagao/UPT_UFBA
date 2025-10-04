@@ -1,25 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from './src/integrations/supabase/client';
-import { Session } from '@supabase/supabase-js';
+import React from 'react';
+import { useAuth } from '@/src/context/AuthContext';
 import { LoginPage } from './components/LoginPage';
 import { MainApp } from './components/MainApp';
+import { Spinner } from './components/common/Spinner';
 
 const App = () => {
-    const [session, setSession] = useState<Session | null>(null);
+    const { session, loading } = useAuth();
 
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-        });
-
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
+    if (loading) {
+        return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
+    }
 
     return (
         <>
