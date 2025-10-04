@@ -37,7 +37,6 @@ export const LoginPage: React.FC = () => {
                 button_label: 'Registrar',
                 loading_button_label: 'Registrando...',
                 link_text: 'Não tem uma conta? Registre-se',
-                user_already_registered: 'Usuário já registrado. Tente fazer o login.',
               },
               forgotten_password: {
                 email_label: 'Email',
