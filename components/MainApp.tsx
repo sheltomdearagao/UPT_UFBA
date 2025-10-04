@@ -10,12 +10,13 @@ import { RedacoesPage } from './pages/RedacoesPage';
 import { Toast } from './common/Toast';
 import { Student, Simulado, CorrectionResult, CorrecaoRedacao, Redacao } from '../types';
 import { useLocalStorage } from '../src/hooks/useLocalStorage';
+import { initialStudents } from '../src/data/initialStudents';
 
 type ActivePage = string | { page: string; [key: string]: any };
 
 export const MainApp: React.FC = () => {
     const [activePage, setActivePage] = useState<ActivePage>('dashboard');
-    const [students, setStudents] = useLocalStorage<Student[]>('students', []);
+    const [students, setStudents] = useLocalStorage<Student[]>('students', initialStudents);
     const [simulados, setSimulados] = useLocalStorage<Simulado[]>('simulados', []);
     const [corrections, setCorrections] = useLocalStorage<CorrectionResult[]>('corrections', []);
     const [correcoesRedacao, setCorrecoesRedacao] = useLocalStorage<CorrecaoRedacao[]>('correcoesRedacao', []);

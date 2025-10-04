@@ -2,21 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './src/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { LoginPage } from './components/LoginPage';
-import { Spinner } from './components/common/Spinner';
 import { MainApp } from './components/MainApp';
 
 const App = () => {
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+        // Immediately set the session from the initial check
+        supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
-            setLoading(false);
-        };
-        getSession();
+        });
 
+        // Listen for future changes
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
         });
@@ -25,10 +22,6 @@ const App = () => {
             authListener.subscription.unsubscribe();
         };
     }, []);
-
-    if (loading) {
-        return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
-    }
 
     return (
         <>
