@@ -1,5 +1,5 @@
 import React from 'react';
-import { HomeIcon, UsersIcon, FileTextIcon, UploadCloudIcon, EditIcon, LogOutIcon, BarChartIcon } from './Icons';
+import { HomeIcon, UsersIcon, FileTextIcon, EditIcon, LogOutIcon, BarChartIcon } from './Icons';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,7 +13,6 @@ const navItems = [
   { id: 'students', label: 'Alunos', icon: UsersIcon },
   { id: 'simulados', label: 'Provas Objetivas', icon: FileTextIcon },
   { id: 'temasRedacao', label: 'Temas de Redação', icon: FileTextIcon },
-  { id: 'upload', label: 'Corrigir Prova Objetiva', icon: UploadCloudIcon },
   { id: 'corrigirRedacao', label: 'Corrigir Redação', icon: EditIcon },
   { id: 'reports', label: 'Relatórios', icon: BarChartIcon },
 ];

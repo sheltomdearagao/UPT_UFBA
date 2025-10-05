@@ -6,32 +6,19 @@ export interface AnswerKeyItem {
   area: AreaConhecimento;
 }
 
-export interface CorrectionDetail {
-  question: number;
-  student_answer: string;
-  correct_answer: string;
-  status: 'correct' | 'incorrect' | 'blank' | 'multiple';
-  area: AreaConhecimento;
-}
-
-export interface CorrectionSummary {
-  correct: number;
-  incorrect: number;
-  blank: number;
-}
-
-export interface CorrectionResult {
+export interface Simulado {
   id: string;
-  studentId: string;
-  simuladoId: string;
-  submittedAt: string;
-  answerSheetUrl: string;
-  score: number;
-  summary: CorrectionSummary;
-  details: CorrectionDetail[];
+  name: string;
+  answerKey: AnswerKeyItem[];
 }
 
-export interface Redacao {
+export interface Profile {
+  id: string;
+  full_name: string;
+  role: 'admin' | 'grader' | 'student';
+}
+
+export interface TemaRedacao {
     id: string;
     title: string;
     prompt: string;
@@ -57,12 +44,7 @@ export interface CorrecaoRedacao {
     observations?: string;
 }
 
-export interface Simulado {
-  id: string;
-  name: string;
-  answerKey: AnswerKeyItem[];
-}
-
+// Legacy type, to be removed once pages are refactored
 export interface Student {
   id:string;
   name: string;
@@ -70,4 +52,23 @@ export interface Student {
   login: string;
   password?: string;
   simulados: Simulado[];
+}
+
+// Legacy type, to be removed
+export interface CorrectionResult {
+  id: string;
+  studentId: string;
+  simuladoId: string;
+  submittedAt: string;
+  answerSheetUrl: string;
+  score: number;
+  summary: any;
+  details: any[];
+}
+
+// Legacy type, to be removed
+export interface Redacao {
+    id: string;
+    title: string;
+    prompt: string;
 }
