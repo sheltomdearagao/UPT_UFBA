@@ -70,4 +70,5 @@ export interface Student {
   login: string;
   password?: string;
   simulados: Simulado[];
+  authId?: string; // To link local student data with Supabase Auth user
 }
