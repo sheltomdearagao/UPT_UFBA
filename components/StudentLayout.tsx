@@ -1,9 +1,9 @@
-
 import React from 'react';
-import { HomeIcon, UsersIcon, FileTextIcon, UploadCloudIcon, EditIcon, LogOutIcon, BarChartIcon } from './Icons';
+import { HomeIcon, FileTextIcon, EditIcon, LogOutIcon } from './Icons';
 
-interface AdminLayoutProps {
+interface StudentLayoutProps {
   children: React.ReactNode;
+  user: { name?: string };
   activePage: string | { page: string; [key: string]: any };
   setActivePage: (page: string | { page: string; [key: string]: any }) => void;
   onLogout: () => void;
@@ -11,21 +11,19 @@ interface AdminLayoutProps {
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HomeIcon },
-  { id: 'students', label: 'Alunos', icon: UsersIcon },
-  { id: 'simulados', label: 'Provas Objetivas', icon: FileTextIcon },
-  { id: 'temasRedacao', label: 'Temas de Redação', icon: FileTextIcon },
-  { id: 'upload', label: 'Corrigir Prova Objetiva', icon: UploadCloudIcon },
-  { id: 'corrigirRedacao', label: 'Corrigir Redação', icon: EditIcon },
-  { id: 'reports', label: 'Relatórios', icon: BarChartIcon },
+  { id: 'results', label: 'Provas Objetivas', icon: FileTextIcon },
+  { id: 'essays', label: 'Minhas Redações', icon: EditIcon },
+  { id: 'essayTopics', label: 'Temas de Redação', icon: FileTextIcon },
 ];
 
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activePage, setActivePage, onLogout }) => {
+export const StudentLayout: React.FC<StudentLayoutProps> = ({ children, user, activePage, setActivePage, onLogout }) => {
   const currentPage = typeof activePage === 'string' ? activePage : activePage.page;
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <aside className="w-64 flex-shrink-0 bg-white dark:bg-gray-800 shadow-lg">
-        <div className="flex items-center justify-center h-20 border-b dark:border-gray-700">
-          <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">Simulados</h1>
+        <div className="flex flex-col items-center justify-center h-20 border-b dark:border-gray-700 px-4">
+          <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">Portal do Aluno</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.name}</p>
         </div>
         <nav className="mt-6 flex-1">
           {navItems.map(item => (

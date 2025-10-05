@@ -1,3 +1,4 @@
+
 import { AreaConhecimento } from "./types";
 
 export const DEFAULT_AI_PROMPT = `You are an expert AI test grading assistant. Your task is to analyze an image of a multiple-choice answer sheet and compare the student's answers to the official answer key provided.

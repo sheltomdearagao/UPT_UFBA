@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card } from '../common/Card';
 import { Student, Simulado, CorrectionResult, CorrecaoRedacao, AreaConhecimento } from '../../types';
@@ -234,10 +235,10 @@ const StudentReport: React.FC<Omit<ReportsPageProps, 'simuladoId'>> = (props) =>
     if (!student) return <p>Aluno não encontrado.</p>;
 
     const getAreaPerformanceForCorrection = (correction: CorrectionResult) => {
-        const stats = AREAS_CONHECIMENTO.reduce<Record<string, { correct: number, total: number }>>((acc, area) => {
+        const stats = AREAS_CONHECIMENTO.reduce((acc, area) => {
             acc[area] = { correct: 0, total: 0 };
             return acc;
-        }, {});
+        }, {} as Record<AreaConhecimento, { correct: number, total: number }>);
          correction.details.forEach(detail => {
             if (stats[detail.area]) {
                 stats[detail.area].total++;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AdminLayout } from './components/AdminLayout';
+import { StudentLayout } from './components/StudentLayout'; 
 import { DashboardPage } from './components/pages/DashboardPage';
 import { StudentsPage } from './components/pages/StudentsPage';
 import { SimuladosPage } from './components/pages/SimuladosPage';
@@ -9,62 +10,14 @@ import { ReportsPage } from './components/pages/ReportsPage';
 import { Toast } from './components/common/Toast';
 import { Student, Simulado, CorrectionResult, CorrecaoRedacao, Redacao } from './types';
 import { RedacoesPage } from './components/pages/RedacoesPage';
+import { LoginPage } from './components/pages/LoginPage';
+import { StudentDashboardPage } from './components/pages/student/StudentDashboardPage';
+import { StudentResultsPage } from './components/pages/student/StudentResultsPage';
+import { StudentEssaysPage } from './components/pages/student/StudentEssaysPage';
+import { StudentEssayTopicsPage } from './components/pages/student/StudentEssayTopicsPage';
 
 type ActivePage = string | { page: string; [key: string]: any };
-
-const initialStudents: Student[] = [
-    { id: "10230655505", name: "Ádine Silva Araújo", cpf: "10230655505", login: "10230655505", password: "10230655505", simulados: [] },
-    { id: "86720059530", name: "Alana", cpf: "86720059530", login: "86720059530", password: "86720059530", simulados: [] },
-    { id: "10084799501", name: "Alice Conceição dos Anjos", cpf: "10084799501", login: "10084799501", password: "10084799501", simulados: [] },
-    { id: "9417662503", name: "Ana Beatriz Nascimento Santos", cpf: "9417662503", login: "9417662503", password: "9417662503", simulados: [] },
-    { id: "85904925590", name: "Ana Luísa de Souza Araújo", cpf: "85904925590", login: "85904925590", password: "85904925590", simulados: [] },
-    { id: "01106787536", name: "Bianca Lorena Paixão dos Santos", cpf: "01106787536", login: "01106787536", password: "01106787536", simulados: [] },
-    { id: "1024140529", name: "Bruna Dos Santos Bittencourt", cpf: "1024140529", login: "1024140529", password: "1024140529", simulados: [] },
-    { id: "86669665562", name: "Caio Conceição de Jesus Santos", cpf: "86669665562", login: "86669665562", password: "86669665562", simulados: [] },
-    { id: "11130255573", name: "Camila Oliveira Santos", cpf: "11130255573", login: "11130255573", password: "11130255573", simulados: [] },
-    { id: "78946794534", name: "Catiane da Silva Reis", cpf: "78946794534", login: "78946794534", password: "78946794534", simulados: [] },
-    { id: "07930019519", name: "Clara Cordeiro Rocha", cpf: "07930019519", login: "07930019519", password: "07930019519", simulados: [] },
-    { id: "06792523550", name: "Danilo dos santos vargas", cpf: "06792523550", login: "06792523550", password: "06792523550", simulados: [] },
-    { id: "4884710505", name: "Diego Armando Ferrer Espada", cpf: "4884710505", login: "4884710505", password: "4884710505", simulados: [] },
-    { id: "85791193575", name: "Icaro Miranda", cpf: "85791193575", login: "85791193575", password: "85791193575", simulados: [] },
-    { id: "06703446563", name: "Isabela Santos guerra", cpf: "06703446563", login: "06703446563", password: "06703446563", simulados: [] },
-    { id: "7115765561", name: "Elton lopes de Santana", cpf: "7115765561", login: "7115765561", password: "7115765561", simulados: [] },
-    { id: "95582754504", name: "Fabiana Lima Borges", cpf: "95582754504", login: "95582754504", password: "95582754504", simulados: [] },
-    { id: "86529620575", name: "Gabriel Amaral Fernandes", cpf: "86529620575", login: "86529620575", password: "86529620575", simulados: [] },
-    { id: "02523377519", name: "Guilherme de Souza Cruz Santos", cpf: "02523377519", login: "02523377519", password: "02523377519", simulados: [] },
-    { id: "673446565", name: "Isabela Santos Guerra", cpf: "673446565", login: "673446565", password: "673446565", simulados: [] },
-    { id: "9270878554", name: "Jader Murilo de Jesus dos Santos", cpf: "9270878554", login: "9270878554", password: "9270878554", simulados: [] },
-    { id: "06438816540", name: "Jailton dos Santos de Oliveira", cpf: "06438816540", login: "06438816540", password: "06438816540", simulados: [] },
-    { id: "86380792570", name: "Jamile Brandão Lopes Ramos", cpf: "86380792570", login: "86380792570", password: "86380792570", simulados: [] },
-    { id: "05609639557", name: "Jean Douglas Guerreiro Lisboa", cpf: "05609639557", login: "05609639557", password: "05609639557", simulados: [] },
-    { id: "86671445508", name: "Jian Victor da Silva Conceição", cpf: "86671445508", login: "86671445508", password: "86671445508", simulados: [] },
-    { id: "07089101576", name: "João Marcelo Soto da cruz", cpf: "07089101576", login: "07089101576", password: "07089101576", simulados: [] },
-    { id: "6429587509", name: "Joseane santos dos santos", cpf: "6429587509", login: "6429587509", password: "6429587509", simulados: [] },
-    { id: "977180506", name: "Josinete de Jesus Santos", cpf: "977180506", login: "977180506", password: "977180506", simulados: [] },
-    { id: "10668797533", name: "Letícia Andrade conceição", cpf: "10668797533", login: "10668797533", password: "10668797533", simulados: [] },
-    { id: "10885167503", name: "Luana Estrela Mota", cpf: "10885167503", login: "10885167503", password: "10885167503", simulados: [] },
-    { id: "10474081559", name: "Luise Santos do Nascimento", cpf: "10474081559", login: "10474081559", password: "10474081559", simulados: [] },
-    { id: "5648956525", name: "Luiz Fellipe Silva Abade Pereira", cpf: "5648956525", login: "5648956525", password: "5648956525", simulados: [] },
-    { id: "09508717530", name: "Luiz Henrique Alves da Cunha", cpf: "09508717530", login: "09508717530", password: "09508717530", simulados: [] },
-    { id: "2978141506", name: "Márcia Rejane Jesus Nêgris Silva", cpf: "2978141506", login: "2978141506", password: "2978141506", simulados: [] },
-    { id: "11406527465", name: "Maria Clara Batista Justiniano", cpf: "11406527465", login: "11406527465", password: "11406527465", simulados: [] },
-    { id: "4817862521", name: "Maria Clara Medrado do Nascimento", cpf: "4817862521", login: "4817862521", password: "4817862521", simulados: [] },
-    { id: "86654569539", name: "Maria Eduarda Ribeiro De Oliveira", cpf: "86654569539", login: "86654569539", password: "86654569539", simulados: [] },
-    { id: "86501936500", name: "Maria Isabel Barreto de Oliveira Santos", cpf: "86501936500", login: "86501936500", password: "86501936500", simulados: [] },
-    { id: "09269821501", name: "Mariana Santos da Silva", cpf: "09269821501", login: "09269821501", password: "09269821501", simulados: [] },
-    { id: "05462316593", name: "Mateus Santos Vieira", cpf: "05462316593", login: "05462316593", password: "05462316593", simulados: [] },
-    { id: "09758887535", name: "Rafaela Oliveira", cpf: "09758887535", login: "09758887535", password: "09758887535", simulados: [] },
-    { id: "86893906501", name: "Samanta Gomes Nascimento", cpf: "86893906501", login: "86893906501", password: "86893906501", simulados: [] },
-    { id: "86893918518", name: "Samylla Gomes Nascimento", cpf: "86893918518", login: "86893918518", password: "86893918518", simulados: [] },
-    { id: "55015034504", name: "Semirames Lima Medrado do Nascimento", cpf: "55015034504", login: "55015034504", password: "55015034504", simulados: [] },
-    { id: "01518310508", name: "Simone Nascimento Santos", cpf: "01518310508", login: "01518310508", password: "01518310508", simulados: [] },
-    { id: "86917479519", name: "Soane Lima de Oliveira", cpf: "86917479519", login: "86917479519", password: "86917479519", simulados: [] },
-    { id: "10288095570", name: "Sophia Soares Leite Anunciação", cpf: "10288095570", login: "10288095570", password: "10288095570", simulados: [] },
-    { id: "11652139583", name: "Suelen Mendes Ribeiro", cpf: "11652139583", login: "11652139583", password: "11652139583", simulados: [] },
-    { id: "49764110525", name: "Valdice", cpf: "49764110525", login: "49764110525", password: "49764110525", simulados: [] },
-    { id: "04785374500", name: "Veridiane de Jesus Santos", cpf: "04785374500", login: "04785374500", password: "04785374500", simulados: [] },
-    { id: "09426991573", name: "Wesley de Jesus Gonçalves", cpf: "09426991573", login: "09426991573", password: "09426991573", simulados: [] }
-];
+type User = { role: 'admin' | 'student'; id?: string; name?: string; };
 
 // A simple hook for persisting state to localStorage
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
@@ -72,7 +25,6 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<R
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-// FIX: Added curly braces to the catch block to fix syntax and subsequent scope errors.
     } catch (error) {
       console.error(error);
       return initialValue;
@@ -93,23 +45,37 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<R
 };
 
 const App = () => {
+    const [user, setUser] = useState<User | null>(null);
     const [activePage, setActivePage] = useState<ActivePage>('dashboard');
-    const [students, setStudents] = useLocalStorage<Student[]>('students', initialStudents);
+    const [students, setStudents] = useLocalStorage<Student[]>('students', []);
     const [simulados, setSimulados] = useLocalStorage<Simulado[]>('simulados', []);
     const [corrections, setCorrections] = useLocalStorage<CorrectionResult[]>('corrections', []);
     const [correcoesRedacao, setCorrecoesRedacao] = useLocalStorage<CorrecaoRedacao[]>('correcoesRedacao', []);
     const [redacoes, setRedacoes] = useLocalStorage<Redacao[]>('redacoes', []);
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
+    useEffect(() => {
+        // Seed a default student if none exist for demonstration purposes.
+        // This ensures student login works on the first run.
+        if (students.length === 0) {
+            setStudents([{ id: 'default-student-01', name: 'Aluno Demonstrativo' }]);
+        }
+    }, []); // Empty dependency array ensures this runs only once on mount.
+
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type });
     };
+    
+    const handleLogin = (loggedInUser: User) => {
+        setUser(loggedInUser);
+        setActivePage('dashboard'); 
+    };
 
     const handleLogout = () => {
-        console.log('Logging out...');
+        setUser(null);
     };
     
-    const renderPage = () => {
+    const renderAdminPage = () => {
         const pageName = typeof activePage === 'string' ? activePage : activePage.page;
         const pageProps = typeof activePage === 'object' ? activePage : {};
 
@@ -129,19 +95,66 @@ const App = () => {
             case 'reports':
                 return <ReportsPage students={students} simulados={simulados} corrections={corrections} correcoesRedacao={correcoesRedacao} setActivePage={setActivePage} {...pageProps} />;
             default:
-                return <div>Page not found</div>;
+                return <DashboardPage students={students} simulados={simulados} corrections={corrections} correcoesRedacao={correcoesRedacao} setActivePage={setActivePage} />;
         }
     };
 
+    const renderStudentPage = () => {
+        const pageName = typeof activePage === 'string' ? activePage : activePage.page;
+        
+        const student = students.find(s => s.id === user?.id);
+        if (!student) return <div>Aluno não encontrado.</div>;
+        
+        const studentCorrections = corrections.filter(c => c.studentId === user.id);
+        const studentRedacoes = correcoesRedacao.filter(c => c.studentId === user.id);
+
+        switch (pageName) {
+            case 'dashboard':
+                return <StudentDashboardPage student={student} corrections={studentCorrections} correcoesRedacao={studentRedacoes} simulados={simulados} />;
+            case 'results':
+                return <StudentResultsPage student={student} corrections={studentCorrections} simulados={simulados} />;
+            case 'essays':
+                return <StudentEssaysPage student={student} correcoesRedacao={studentRedacoes} simulados={simulados} />;
+            case 'essayTopics':
+                return <StudentEssayTopicsPage redacoes={redacoes} />;
+            default:
+                return <StudentDashboardPage student={student} corrections={studentCorrections} correcoesRedacao={studentRedacoes} simulados={simulados} />;
+        }
+    };
+
+    const renderContent = () => {
+        if (!user) {
+            return <LoginPage students={students} onLogin={handleLogin} showToast={showToast} />;
+        }
+        if (user.role === 'admin') {
+            return (
+                 <AdminLayout
+                    activePage={activePage}
+                    setActivePage={setActivePage}
+                    onLogout={handleLogout}
+                >
+                    {renderAdminPage()}
+                </AdminLayout>
+            );
+        }
+        if (user.role === 'student') {
+            return (
+                <StudentLayout
+                    user={user}
+                    activePage={activePage}
+                    setActivePage={setActivePage}
+                    onLogout={handleLogout}
+                >
+                    {renderStudentPage()}
+                </StudentLayout>
+            );
+        }
+        return null;
+    }
+
     return (
         <>
-            <AdminLayout
-                activePage={activePage}
-                setActivePage={setActivePage}
-                onLogout={handleLogout}
-            >
-                {renderPage()}
-            </AdminLayout>
+            {renderContent()}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </>
     );

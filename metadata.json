@@ -1,5 +1,5 @@
 {
-  "name": "AI Test Correction System",
-  "description": "An application for administrators to manage students and tests (simulados), upload answer sheets for automatic AI-powered grading via Gemini, and for students to view their results.",
+  "name": "upt_ufba sem supabase",
+  "description": "Última atualização funcional e segura 05/10\n",
   "requestFramePermissions": []
 }
