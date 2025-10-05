@@ -1,21 +1,77 @@
-import React from 'react';
-import { useAuth } from './context/AuthContext';
-import { LoginPage } from '../components/LoginPage';
-import { MainApp } from '../components/MainApp';
-import { Spinner } from '../components/common/Spinner';
+import { useState } from "react";
+import { Student } from "../types";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { initialStudents } from "./data/initialStudents";
 
-const App = () => {
-    const { session, loading } = useAuth();
+// Components
+import Dashboard from "./components/Dashboard";
+import StudentDetails from "./components/StudentDetails";
+import Login from "./components/Login";
+import Header from "./components/Header";
+import { Toaster } from "./components/common/Toast";
 
-    if (loading) {
-        return <div className="flex justify-center items-center h-screen"><Spinner size="lg" /></div>;
+function App() {
+  const [students, setStudents] = useLocalStorage<Student[]>("students", initialStudents);
+  const [currentUser, setCurrentUser] = useLocalStorage<Student | null>("currentUser", null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+  const handleLogin = (user: Student) => {
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setSelectedStudent(null);
+  };
+
+  const handleSelectStudent = (student: Student) => {
+    setSelectedStudent(student);
+  };
+
+  const handleBackToDashboard = () => {
+    setSelectedStudent(null);
+  };
+
+  const updateStudentData = (updatedStudent: Student) => {
+    const updatedStudents = students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
+    setStudents(updatedStudents);
+    if (selectedStudent?.id === updatedStudent.id) {
+      setSelectedStudent(updatedStudent);
     }
+    if (currentUser?.id === updatedStudent.id) {
+      setCurrentUser(updatedStudent);
+    }
+  };
 
-    return (
-        <>
-            {!session ? <LoginPage /> : <MainApp />}
-        </>
-    );
+  if (!currentUser) {
+    return <Login students={students} onLogin={handleLogin} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 text-gray-800">
+      <Toaster />
+      <Header
+        user={currentUser}
+        onLogout={handleLogout}
+        onBack={selectedStudent ? handleBackToDashboard : undefined}
+        showBack={!!selectedStudent}
+      />
+      <main className="p-4 sm:p-6 md:p-8">
+        {selectedStudent ? (
+          <StudentDetails
+            student={selectedStudent}
+            updateStudentData={updateStudentData}
+          />
+        ) : (
+          <Dashboard
+            students={students}
+            onSelectStudent={handleSelectStudent}
+            currentUser={currentUser}
+          />
+        )}
+      </main>
+    </div>
+  );
 }
 
 export default App;
