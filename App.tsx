@@ -57,7 +57,7 @@ const App = () => {
             case 'simulados':
                 return <SimuladosPage showToast={showToast} setActivePage={setActivePage} />;
             case 'temasRedacao':
-                return <TemasRedacaoPage showToast={showToast} />;
+                return <TemasRedacaoPage temasRedacao={temasRedacao} setTemasRedacao={setTemasRedacao} showToast={showToast} />;
             case 'corrigirRedacao':
                  return <CorrigirRedacaoPage showToast={showToast} />;
             case 'reports':
