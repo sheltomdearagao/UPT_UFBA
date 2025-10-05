@@ -1,12 +1,10 @@
--- Students table
-CREATE TABLE students (
+CREATE TABLE IF NOT EXISTS students (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Simulados table
-CREATE TABLE simulados (
+CREATE TABLE IF NOT EXISTS simulados (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     answer_key JSONB NOT NULL, -- Stores the AnswerKeyItem[] as JSON
@@ -14,7 +12,7 @@ CREATE TABLE simulados (
 );
 
 -- Correction results table (for multiple-choice tests)
-CREATE TABLE correction_results (
+CREATE TABLE IF NOT EXISTS correction_results (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     student_id UUID REFERENCES students(id) ON DELETE CASCADE,
     simulado_id UUID REFERENCES simulados(id) ON DELETE CASCADE,
@@ -27,7 +25,7 @@ CREATE TABLE correction_results (
 );
 
 -- Essay topics table
-CREATE TABLE redacoes (
+CREATE TABLE IF NOT EXISTS redacoes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     prompt TEXT NOT NULL,
@@ -35,7 +33,7 @@ CREATE TABLE redacoes (
 );
 
 -- Essay corrections table
-CREATE TABLE correcoes_redacao (
+CREATE TABLE IF NOT EXISTS correcoes_redacao (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     student_id UUID REFERENCES students(id) ON DELETE CASCADE,
     simulado_id UUID REFERENCES simulados(id) ON DELETE CASCADE, -- Associate with a simulado
@@ -49,7 +47,7 @@ CREATE TABLE correcoes_redacao (
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_correction_results_student_id ON correction_results(student_id);
-CREATE INDEX idx_correction_results_simulado_id ON correction_results(simulado_id);
-CREATE INDEX idx_correcoes_redacao_student_id ON correcoes_redacao(student_id);
-CREATE INDEX idx_correcoes_redacao_simulado_id ON correcoes_redacao(simulado_id);
+CREATE INDEX IF NOT EXISTS idx_correction_results_student_id ON correction_results(student_id);
+CREATE INDEX IF NOT EXISTS idx_correction_results_simulado_id ON correction_results(simulado_id);
+CREATE INDEX IF NOT EXISTS idx_correcoes_redacao_student_id ON correcoes_redacao(student_id);
+CREATE INDEX IF NOT EXISTS idx_correcoes_redacao_simulado_id ON correcoes_redacao(simulado_id);

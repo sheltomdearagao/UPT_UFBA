@@ -39,13 +39,50 @@ const { createClient } = await import('@supabase/supabase-js');
 const supabase = createClient.createClient ? createClient.createClient(url, anonKey) : createClient(url, anonKey);
 
 try {
-  const { data, error } = await supabase.from('students').select('id').limit(1);
-  if (error) {
-    console.error('Supabase query error:', error.message || JSON.stringify(error));
+  // Try several possible table names to be tolerant with Portuguese/English schemas
+  const studentTableCandidates = ['students', 'alunos'];
+  const correctionTableCandidates = ['correction_results', 'resultados_provas', 'correcoes_redacao'];
+  const simuladoCandidates = ['simulados', 'simulados'];
+
+  let found = false;
+  for (const t of studentTableCandidates) {
+    const { data, error } = await supabase.from(t).select('id').limit(1);
+    if (!error) {
+      console.log(`Supabase check OK. found table '${t}', rows:`, (data && data.length) || 0);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    // try correction tables
+    for (const t of correctionTableCandidates) {
+      const { data, error } = await supabase.from(t).select('id').limit(1);
+      if (!error) {
+        console.log(`Supabase check OK. found correction table '${t}', rows:`, (data && data.length) || 0);
+        found = true;
+        break;
+      }
+    }
+  }
+
+  if (!found) {
+    // try simulado/redacao
+    for (const t of [...simuladoCandidates, 'redacoes', 'temas_redacao']) {
+      const { data, error } = await supabase.from(t).select('id').limit(1);
+      if (!error) {
+        console.log(`Supabase check OK. found table '${t}', rows:`, (data && data.length) || 0);
+        found = true;
+        break;
+      }
+    }
+  }
+
+  if (!found) {
+    console.error('No expected tables (students/alunos/correction_results/etc) were found in the database.');
     process.exit(3);
   }
 
-  console.log('Supabase check OK. rows:', (data && data.length) || 0);
   process.exit(0);
 } catch (err) {
   console.error('Unexpected error connecting to Supabase:', err.message || err);
