@@ -1,5 +1,5 @@
 {
-  "name": "upt_ufba sem supabase",
-  "description": "Última atualização funcional e segura 05/10\n",
+  "name": "upt_ufba",
+  "description": "An application for administrators to manage students and tests (simulados), upload answer sheets for automatic AI-powered grading via Gemini, and for students to view their results.",
   "requestFramePermissions": []
 }

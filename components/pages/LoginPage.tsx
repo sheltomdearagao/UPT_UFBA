@@ -1,32 +1,16 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Card } from '../common/Card';
 import { FileTextIcon } from '../Icons';
-import { Student } from '../../types';
 
 interface LoginPageProps {
-  students: Student[];
-  onLogin: (user: { role: 'admin' | 'student'; id?: string; name?: string; }) => void;
-  showToast: (message: string, type: 'success' | 'error') => void;
+  onLogin: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ students, onLogin, showToast }) => {
-  const [email, setEmail] = useState('');
-
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.toLowerCase() === 'admin@example.com') {
-      onLogin({ role: 'admin' });
-    } else if (email.toLowerCase() === 'student@example.com') {
-      if (students.length > 0) {
-        // Log in as the first student for demonstration purposes
-        const studentUser = students[0];
-        onLogin({ role: 'student', id: studentUser.id, name: studentUser.name });
-      } else {
-        showToast('Nenhum aluno cadastrado no sistema para login.', 'error');
-      }
-    } else {
-        showToast('Credenciais inválidas. Use admin@example.com ou student@example.com.', 'error');
-    }
+    onLogin();
   };
 
   return (
@@ -37,7 +21,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ students, onLogin, showToa
                  <FileTextIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
             </div>
             <h1 className="text-4xl font-extrabold text-gray-800 dark:text-gray-100 tracking-tight">AI Test Correction System</h1>
-            <p className="mt-3 text-lg text-gray-500 dark:text-gray-400">A correção simplificada, inteligente e rápida.</p>
+            <p className="mt-3 text-lg text-gray-500 dark:text-gray-400">Grading made simple, intelligent, and fast.</p>
         </div>
         <Card>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -55,11 +39,37 @@ export const LoginPage: React.FC<LoginPageProps> = ({ students, onLogin, showToa
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@example.com ou student@example.com"
+                  defaultValue="admin@example.com"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Senha
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  defaultValue="password"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                  Esqueceu sua senha?
+                </a>
               </div>
             </div>
 
@@ -73,11 +83,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ students, onLogin, showToa
             </div>
           </form>
         </Card>
-        <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p className="font-semibold">Para demonstração, use:</p>
-          <p><strong className="text-gray-700 dark:text-gray-200">Admin:</strong> admin@example.com</p>
-          <p><strong className="text-gray-700 dark:text-gray-200">Aluno:</strong> student@example.com</p>
-        </div>
       </div>
     </div>
   );
