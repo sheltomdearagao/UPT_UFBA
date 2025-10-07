@@ -30,12 +30,21 @@ const App = () => {
     const [redacoes, setRedacoes] = useState<Redacao[]>([]);
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+    };
+
     useEffect(() => {
         setLoading(true);
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setLoading(false);
+        }).catch(error => {
+            console.error("Error fetching session:", error);
+            showToast("Falha ao carregar a sessão. Verifique sua conexão e configuração.", "error");
+            setLoading(false);
         });
+
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
@@ -77,19 +86,17 @@ const App = () => {
                 }
             };
             fetchData();
+        } else {
+            setInitialDataLoading(false);
         }
     }, [session]);
 
-
-    const showToast = (message: string, type: 'success' | 'error') => {
-        setToast({ message, type });
-    };
     
     const renderPage = () => {
         const pageName = typeof activePage === 'string' ? activePage : activePage.page;
         const pageProps = typeof activePage === 'object' ? activePage : {};
 
-        if (initialDataLoading) {
+        if (initialDataLoading && session) {
             return (
                 <div className="flex justify-center items-center h-full">
                     <Spinner size="lg" />
@@ -113,7 +120,7 @@ const App = () => {
             case 'reports':
                 return <ReportsPage students={students} simulados={simulados} corrections={corrections} correcoesRedacao={correcoesRedacao} setActivePage={setActivePage} {...pageProps} />;
             default:
-                return <div>Page not found</div>;
+                return <DashboardPage students={students} simulados={simulados} corrections={corrections} correcoesRedacao={correcoesRedacao} setActivePage={setActivePage} />;
         }
     };
 
