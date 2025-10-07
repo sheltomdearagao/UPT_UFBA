@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Card } from '../common/Card';
-import { Spinner } from '../common/Spinner';
 import { Student, Simulado, CorrecaoRedacao, RedacaoSituation } from '../../types';
 import { COMPETENCY_LEVELS, COMPETENCY_2_LEVELS, REDACAO_SITUATIONS } from '../../constants';
 import { UploadCloudIcon } from '../Icons';
+import { supabase } from '../../services/supabaseClient';
 
 interface CompetencyGraderProps {
     name: string;
@@ -54,7 +53,6 @@ export const CorrigirRedacaoPage: React.FC<{
 
     const [isCorrecting, setIsCorrecting] = useState(false);
     
-    // FIX: Add explicit type to state to help TypeScript infer types correctly for Object.values().
     const [scores, setScores] = useState<CorrecaoRedacao['scores']>({ c1: -1, c2: -1, c3: -1, c4: -1, c5: -1 });
     const [situation, setSituation] = useState<RedacaoSituation | ''>('');
     const [observations, setObservations] = useState('');
@@ -66,7 +64,6 @@ export const CorrigirRedacaoPage: React.FC<{
             setFinalScore(0);
             return;
         }
-        // FIX: Cast Object.values to number[] to fix type inference issues where `s`, `acc`, and `curr` were `unknown`.
         const newTotal = (Object.values(scores) as number[]).filter(s => s >= 0).reduce((acc, curr) => acc + curr, 0);
         setFinalScore(newTotal);
     }, [scores, situation]);
@@ -104,28 +101,35 @@ export const CorrigirRedacaoPage: React.FC<{
         setIsCorrecting(false);
     }
 
-    const saveCorrection = () => {
-        // FIX: Cast Object.values to number[] to fix type inference issue where `s` was `unknown`.
+    const saveCorrection = async () => {
         if ((Object.values(scores) as number[]).some(s => s < 0) && !situation) {
             showToast('Todas as competências devem ser avaliadas.', 'error');
             return;
         }
 
-        const newCorrection: CorrecaoRedacao = {
-            id: new Date().toISOString(),
+        const newCorrectionData = {
             studentId: selectedStudentId,
             simuladoId: selectedSimuladoId,
-            submittedAt: new Date().toISOString(),
-            redacaoImageUrl: imagePreview!,
+            redacaoImageUrl: imagePreview!, // In a real app, upload this to Supabase Storage
             scores: scores as { c1: number; c2: number; c3: number; c4: number; c5: number; },
             finalScore,
             situation: situation || undefined,
             observations: observations.trim() || undefined,
         };
 
-        setCorrecoesRedacao(prev => [...prev, newCorrection]);
-        showToast('Correção salva com sucesso!', 'success');
-        resetForm();
+        const { data, error } = await supabase
+            .from('correcoes_redacao')
+            .insert(newCorrectionData)
+            .select()
+            .single();
+
+        if (error) {
+            showToast(`Erro ao salvar correção: ${error.message}`, 'error');
+        } else if (data) {
+            setCorrecoesRedacao(prev => [...prev, data as CorrecaoRedacao]);
+            showToast('Correção salva com sucesso!', 'success');
+            resetForm();
+        }
     };
 
     if (isCorrecting) {

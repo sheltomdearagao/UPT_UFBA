@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card } from '../common/Card';
 import { Modal } from '../common/Modal';
 import { Student } from '../../types';
 import { UsersIcon, PlusCircleIcon, Trash2Icon, EditIcon } from '../Icons';
+import { supabase } from '../../services/supabaseClient';
 
 interface StudentsPageProps {
   students: Student[];
@@ -29,7 +29,7 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ students, setStudent
     setIsModalOpen(true);
   };
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!studentName.trim()) {
       showToast('O nome do aluno não pode estar em branco.', 'error');
       return;
@@ -37,16 +37,34 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ students, setStudent
 
     if (editingStudent) {
       // Editing existing student
-      setStudents(students.map(s => s.id === editingStudent.id ? { ...s, name: studentName.trim() } : s));
-      showToast('Aluno atualizado com sucesso!', 'success');
+      const { data, error } = await supabase
+        .from('students')
+        .update({ name: studentName.trim() })
+        .eq('id', editingStudent.id)
+        .select()
+        .single();
+        
+      if (error) {
+        showToast(`Erro ao atualizar aluno: ${error.message}`, 'error');
+      } else if (data) {
+        setStudents(students.map(s => s.id === editingStudent.id ? data : s));
+        showToast('Aluno atualizado com sucesso!', 'success');
+      }
+
     } else {
       // Adding new student
-      const newStudent: Student = {
-        id: new Date().toISOString(),
-        name: studentName.trim(),
-      };
-      setStudents([...students, newStudent]);
-      showToast('Aluno adicionado com sucesso!', 'success');
+      const { data, error } = await supabase
+        .from('students')
+        .insert({ name: studentName.trim() })
+        .select()
+        .single();
+      
+      if (error) {
+        showToast(`Erro ao adicionar aluno: ${error.message}`, 'error');
+      } else if (data) {
+        setStudents([...students, data]);
+        showToast('Aluno adicionado com sucesso!', 'success');
+      }
     }
 
     setIsModalOpen(false);
@@ -54,10 +72,19 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ students, setStudent
     setEditingStudent(null);
   };
 
-  const handleDelete = (studentId: string) => {
+  const handleDelete = async (studentId: string) => {
     if (window.confirm('Tem certeza que deseja excluir este aluno?')) {
-        setStudents(students.filter(s => s.id !== studentId));
-        showToast('Aluno excluído com sucesso!', 'success');
+        const { error } = await supabase
+          .from('students')
+          .delete()
+          .eq('id', studentId);
+        
+        if (error) {
+          showToast(`Erro ao excluir aluno: ${error.message}`, 'error');
+        } else {
+          setStudents(students.filter(s => s.id !== studentId));
+          showToast('Aluno excluído com sucesso!', 'success');
+        }
     }
   };
   

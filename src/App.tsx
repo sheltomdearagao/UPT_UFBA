@@ -11,61 +11,91 @@ import { Toast } from './components/common/Toast';
 import { Student, Simulado, CorrectionResult, CorrecaoRedacao, Redacao } from './types';
 import { RedacoesPage } from './components/pages/RedacoesPage';
 import { LoginPage } from './components/pages/LoginPage';
+import { supabase } from './services/supabaseClient';
+import { Session } from '@supabase/supabase-js';
+import { Spinner } from './components/common/Spinner';
 
 type ActivePage = string | { page: string; [key: string]: any };
 
-// A simple hook for persisting state to localStorage
-const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-// FIX: Added curly braces to the catch block to fix syntax and subsequent scope errors.
-    } catch (error) {
-      console.error(error);
-      return initialValue;
-    }
-  });
-
-  const setValue: React.Dispatch<React.SetStateAction<T>> = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [session, setSession] = useState<Session | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [initialDataLoading, setInitialDataLoading] = useState(true);
+
     const [activePage, setActivePage] = useState<ActivePage>('dashboard');
-    const [students, setStudents] = useLocalStorage<Student[]>('students', []);
-    const [simulados, setSimulados] = useLocalStorage<Simulado[]>('simulados', []);
-    const [corrections, setCorrections] = useLocalStorage<CorrectionResult[]>('corrections', []);
-    const [correcoesRedacao, setCorrecoesRedacao] = useLocalStorage<CorrecaoRedacao[]>('correcoesRedacao', []);
-    const [redacoes, setRedacoes] = useLocalStorage<Redacao[]>('redacoes', []);
+    const [students, setStudents] = useState<Student[]>([]);
+    const [simulados, setSimulados] = useState<Simulado[]>([]);
+    const [corrections, setCorrections] = useState<CorrectionResult[]>([]);
+    const [correcoesRedacao, setCorrecoesRedacao] = useState<CorrecaoRedacao[]>([]);
+    const [redacoes, setRedacoes] = useState<Redacao[]>([]);
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+    useEffect(() => {
+        setLoading(true);
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setLoading(false);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (session) {
+            const fetchData = async () => {
+                setInitialDataLoading(true);
+                try {
+                    const [
+                        studentsRes,
+                        simuladosRes,
+                        correctionsRes,
+                        correcoesRedacaoRes,
+                        redacoesRes
+                    ] = await Promise.all([
+                        supabase.from('students').select('*'),
+                        supabase.from('simulados').select('*'),
+                        supabase.from('corrections').select('*'),
+                        supabase.from('correcoes_redacao').select('*'),
+                        supabase.from('redacoes').select('*'),
+                    ]);
+
+                    if (studentsRes.data) setStudents(studentsRes.data);
+                    if (simuladosRes.data) setSimulados(simuladosRes.data);
+                    if (correctionsRes.data) setCorrections(correctionsRes.data);
+                    if (correcoesRedacaoRes.data) setCorrecoesRedacao(correcoesRedacaoRes.data);
+                    if (redacoesRes.data) setRedacoes(redacoesRes.data);
+
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                    showToast("Erro ao carregar os dados.", "error");
+                } finally {
+                    setInitialDataLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [session]);
+
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type });
     };
     
-    const handleLogin = () => {
-        setIsLoggedIn(true);
-        setActivePage('dashboard'); // Reset to dashboard on login
-    };
-
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-    };
-    
     const renderPage = () => {
         const pageName = typeof activePage === 'string' ? activePage : activePage.page;
         const pageProps = typeof activePage === 'object' ? activePage : {};
+
+        if (initialDataLoading) {
+            return (
+                <div className="flex justify-center items-center h-full">
+                    <Spinner size="lg" />
+                </div>
+            );
+        }
 
         switch (pageName) {
             case 'dashboard':
@@ -87,18 +117,25 @@ const App = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900">
+                <Spinner size="lg" />
+            </div>
+        );
+    }
+
     return (
         <>
-            {isLoggedIn ? (
+            {session ? (
                 <AdminLayout
                     activePage={activePage}
                     setActivePage={setActivePage}
-                    onLogout={handleLogout}
                 >
                     {renderPage()}
                 </AdminLayout>
             ) : (
-                <LoginPage onLogin={handleLogin} />
+                <LoginPage />
             )}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </>

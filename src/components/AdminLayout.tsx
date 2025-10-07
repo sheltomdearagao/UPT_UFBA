@@ -1,12 +1,11 @@
-
 import React from 'react';
 import { HomeIcon, UsersIcon, FileTextIcon, UploadCloudIcon, EditIcon, LogOutIcon, BarChartIcon } from './Icons';
+import { supabase } from '../services/supabaseClient';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   activePage: string | { page: string; [key: string]: any };
   setActivePage: (page: string | { page: string; [key: string]: any }) => void;
-  onLogout: () => void;
 }
 
 const navItems = [
@@ -19,8 +18,17 @@ const navItems = [
   { id: 'reports', label: 'Relatórios', icon: BarChartIcon },
 ];
 
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activePage, setActivePage, onLogout }) => {
+export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activePage, setActivePage }) => {
   const currentPage = typeof activePage === 'string' ? activePage : activePage.page;
+  
+  const handleLogout = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+          console.error("Error logging out:", error);
+      }
+      // The auth state change listener in App.tsx will handle redirecting.
+  };
+
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <aside className="w-64 flex-shrink-0 bg-white dark:bg-gray-800 shadow-lg">
@@ -47,7 +55,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activePage, 
         <div className="absolute bottom-0 w-64">
            <a
               href="#"
-              onClick={(e) => { e.preventDefault(); onLogout(); }}
+              onClick={(e) => { e.preventDefault(); handleLogout(); }}
               className="flex items-center px-6 py-4 text-base font-medium hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <LogOutIcon className="w-6 h-6" />

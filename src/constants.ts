@@ -1,4 +1,3 @@
-
 import { AreaConhecimento } from "./types";
 
 export const COMPETENCY_LEVELS: { level: number; score: number }[] = [

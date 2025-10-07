@@ -1,4 +1,3 @@
-
 export interface Student {
   id: string;
   name: string;
@@ -30,35 +29,34 @@ export interface CorrectionSummary {
   correct: number;
   incorrect: number;
   blank: number;
+  multiple: number;
 }
 
 export interface CorrectionResult {
   id: string;
   studentId: string;
   simuladoId: string;
-  submittedAt: string; // Using string for easier serialization in localStorage
-  answerSheetUrl: string; // Base64 data URL
+  submittedAt: string; 
+  answerSheetUrl: string; 
   score: number;
   summary: CorrectionSummary;
   details: CorrectionDetail[];
 }
 
-// FIX: Add Redacao interface for essay topics
 export interface Redacao {
   id: string;
   title: string;
   prompt: string;
 }
 
-// New types for Manual Essay Correction
 export type RedacaoSituation = 'Em Branco' | 'Texto Insuficiente' | 'FEA' | 'Cópia' | 'Fuga ao Tema' | 'NATT' | 'PD';
 
 export interface CorrecaoRedacao {
-  id: string;
+  id:string;
   studentId: string;
-  simuladoId: string; // Associate with a simulado for reporting
+  simuladoId: string; 
   submittedAt: string;
-  redacaoImageUrl: string; // Base64 URL of the essay image
+  redacaoImageUrl: string;
   scores: {
     c1: number;
     c2: number;
@@ -68,5 +66,5 @@ export interface CorrecaoRedacao {
   };
   finalScore: number;
   situation?: RedacaoSituation;
-  observations?: string; // Optional field for grader's observations
+  observations?: string;
 }

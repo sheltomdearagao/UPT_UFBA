@@ -1,22 +1,11 @@
-
 import { AreaConhecimento } from "./types";
 
-export const DEFAULT_AI_PROMPT = `You are an expert AI test grading assistant. Your task is to analyze an image of a multiple-choice answer sheet and compare the student's answers to the official answer key provided.
-
-Instructions:
-1.  Carefully examine the answer sheet image.
-2.  For each question number, determine which option the student marked (A, B, C, D, E).
-3.  If a question is left blank, the student's answer is 'blank'.
-4.  If a student has marked more than one option for a single question, their answer is 'multiple'.
-5.  Compare the student's answer to the correct answer in the provided key. For each question, you MUST include the 'area' provided in the key.
-6.  Calculate the final score, where each correct answer is worth 1 point.
-7.  You MUST return your analysis in a valid JSON format that adheres to the provided schema. Do not include any text or markdown formatting outside of the JSON object.
-
-Here is the official answer key (in JSON format):
----
-{{ANSWER_KEY}}
----
-`;
+// FIX: Add missing DEFAULT_AI_PROMPT constant.
+export const DEFAULT_AI_PROMPT = `You are an AI assistant specialized in correcting multiple-choice answer sheets from images.
+Analyze the provided image and compare the student's answers to the official answer key below.
+The official answer key is: {{ANSWER_KEY}}
+For each question, determine if the student's answer is 'correct', 'incorrect', 'blank' (no answer marked), or 'multiple' (more than one answer marked).
+You MUST return your response as a valid JSON object that strictly adheres to the provided schema. Do not include any text or markdown formatting before or after the JSON object.`;
 
 export const COMPETENCY_LEVELS: { level: number; score: number }[] = [
   { level: 0, score: 0 },

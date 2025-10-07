@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card } from '../common/Card';
-import { Student, Simulado, CorrectionResult, CorrectionDetail } from '../../types';
+import { Student, Simulado, CorrectionResult, CorrectionDetail, CorrectionSummary } from '../../types';
 import { UploadCloudIcon } from '../Icons';
+import { supabase } from '../../services/supabaseClient';
 
 type StudentAnswerOptions = 'A' | 'B' | 'C' | 'D' | 'E' | 'blank' | 'multiple';
 
@@ -52,11 +52,11 @@ export const CorrigirProvaObjetivaPage: React.FC<CorrigirProvaObjetivaPageProps>
         setIsCorrecting(false);
     };
 
-    const handleSaveCorrection = () => {
+    const handleSaveCorrection = async () => {
         if (!selectedSimulado) return;
 
         let score = 0;
-        const summary = { correct: 0, incorrect: 0, blank: 0, multiple: 0 };
+        const summary: CorrectionSummary = { correct: 0, incorrect: 0, blank: 0, multiple: 0 };
         const details: CorrectionDetail[] = selectedSimulado.answerKey.map(keyItem => {
             const studentAnswer = studentAnswers[keyItem.question] || 'blank';
             let status: CorrectionDetail['status'] = 'blank';
@@ -67,7 +67,7 @@ export const CorrigirProvaObjetivaPage: React.FC<CorrigirProvaObjetivaPageProps>
             } else if (studentAnswer === 'multiple') {
                 summary.multiple++;
                 status = 'multiple';
-            } else if (studentAnswer === keyItem.answer.toUpperCase()) {
+            } else if (studentAnswer.toUpperCase() === keyItem.answer.toUpperCase()) {
                 summary.correct++;
                 score++;
                 status = 'correct';
@@ -85,20 +85,28 @@ export const CorrigirProvaObjetivaPage: React.FC<CorrigirProvaObjetivaPageProps>
             };
         });
 
-        const newCorrection: CorrectionResult = {
-            id: new Date().toISOString(),
+        const newCorrectionData = {
             studentId: selectedStudentId,
             simuladoId: selectedSimuladoId,
-            submittedAt: new Date().toISOString(),
-            answerSheetUrl: imagePreview!,
+            answerSheetUrl: imagePreview!, // In a real app, upload this to Supabase Storage
             score,
             summary,
             details,
         };
 
-        setCorrections(prev => [...prev, newCorrection]);
-        showToast('Correção salva com sucesso!', 'success');
-        resetForm();
+        const { data, error } = await supabase
+            .from('corrections')
+            .insert(newCorrectionData)
+            .select()
+            .single();
+
+        if (error) {
+            showToast(`Erro ao salvar correção: ${error.message}`, 'error');
+        } else if (data) {
+            setCorrections(prev => [...prev, data as CorrectionResult]);
+            showToast('Correção salva com sucesso!', 'success');
+            resetForm();
+        }
     };
 
     if (isCorrecting && selectedSimulado) {

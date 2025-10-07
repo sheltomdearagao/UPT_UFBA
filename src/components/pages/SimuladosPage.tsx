@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card } from '../common/Card';
 import { Modal } from '../common/Modal';
 import { Simulado, AnswerKeyItem, AreaConhecimento } from '../../types';
 import { FileTextIcon, PlusCircleIcon, Trash2Icon, EditIcon } from '../Icons';
 import { AREAS_CONHECIMENTO } from '../../constants';
+import { supabase } from '../../services/supabaseClient';
 
 interface SimuladosPageProps {
   simulados: Simulado[];
@@ -57,7 +57,7 @@ const AnswerKeyEditor: React.FC<{ answerKey: AnswerKeyItem[]; setAnswerKey: Reac
                     <div className="col-span-5">
                         <select 
                             value={item.area}
-                            onChange={(e) => updateQuestion(index, 'area', e.target.value)}
+                            onChange={(e) => updateQuestion(index, 'area', e.target.value as AreaConhecimento)}
                             className="w-full px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-500"
                         >
                             {AREAS_CONHECIMENTO.map(area => <option key={area} value={area}>{area}</option>)}
@@ -102,32 +102,62 @@ export const SimuladosPage: React.FC<SimuladosPageProps> = ({ simulados, setSimu
     setIsModalOpen(true);
   };
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!simuladoName.trim() || answerKey.length === 0 || answerKey.some(q => !q.answer.trim())) {
       showToast('O nome e o gabarito completo da prova objetiva são obrigatórios.', 'error');
       return;
     }
 
-    if (editingSimulado) {
-      setSimulados(simulados.map(s => s.id === editingSimulado.id ? { ...s, name: simuladoName.trim(), answerKey } : s));
-      showToast('Prova objetiva atualizada com sucesso!', 'success');
-    } else {
-      const newSimulado: Simulado = {
-        id: new Date().toISOString(),
+    const simuladoData = {
         name: simuladoName.trim(),
         answerKey,
-      };
-      setSimulados([...simulados, newSimulado]);
-      showToast('Prova objetiva adicionada com sucesso!', 'success');
+    };
+
+    if (editingSimulado) {
+      const { data, error } = await supabase
+        .from('simulados')
+        .update(simuladoData)
+        .eq('id', editingSimulado.id)
+        .select()
+        .single();
+
+      if (error) {
+          showToast(`Erro ao atualizar prova: ${error.message}`, 'error');
+      } else if (data) {
+          setSimulados(simulados.map(s => s.id === editingSimulado.id ? data as Simulado : s));
+          showToast('Prova objetiva atualizada com sucesso!', 'success');
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('simulados')
+        .insert(simuladoData)
+        .select()
+        .single();
+        
+      if (error) {
+        showToast(`Erro ao adicionar prova: ${error.message}`, 'error');
+      } else if (data) {
+        setSimulados([...simulados, data as Simulado]);
+        showToast('Prova objetiva adicionada com sucesso!', 'success');
+      }
     }
 
     setIsModalOpen(false);
   };
   
-  const handleDelete = (simuladoId: string) => {
+  const handleDelete = async (simuladoId: string) => {
     if (window.confirm('Tem certeza que deseja excluir esta prova objetiva?')) {
-        setSimulados(simulados.filter(s => s.id !== simuladoId));
-        showToast('Prova objetiva excluída com sucesso!', 'success');
+        const { error } = await supabase
+          .from('simulados')
+          .delete()
+          .eq('id', simuladoId);
+        
+        if (error) {
+            showToast(`Erro ao excluir prova: ${error.message}`, 'error');
+        } else {
+            setSimulados(simulados.filter(s => s.id !== simuladoId));
+            showToast('Prova objetiva excluída com sucesso!', 'success');
+        }
     }
   };
 

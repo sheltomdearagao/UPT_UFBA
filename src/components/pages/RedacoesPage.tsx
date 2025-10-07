@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card } from '../common/Card';
 import { Modal } from '../common/Modal';
 import { Redacao } from '../../types';
 import { FileTextIcon, PlusCircleIcon, Trash2Icon, EditIcon } from '../Icons';
+import { supabase } from '../../services/supabaseClient';
 
 interface RedacoesPageProps {
   redacoes: Redacao[];
@@ -31,23 +31,45 @@ export const RedacoesPage: React.FC<RedacoesPageProps> = ({ redacoes, setRedacoe
     setIsModalOpen(true);
   };
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim() || !prompt.trim()) {
       showToast('O título e o texto do tema são obrigatórios.', 'error');
       return;
     }
 
-    if (editingRedacao) {
-      setRedacoes(redacoes.map(r => r.id === editingRedacao.id ? { ...r, title: title.trim(), prompt: prompt.trim() } : r));
-      showToast('Tema atualizado com sucesso!', 'success');
-    } else {
-      const newRedacao: Redacao = {
-        id: new Date().toISOString(),
+    const redacaoData = {
         title: title.trim(),
         prompt: prompt.trim(),
-      };
-      setRedacoes([...redacoes, newRedacao]);
-      showToast('Tema adicionado com sucesso!', 'success');
+    };
+
+    if (editingRedacao) {
+        const { data, error } = await supabase
+            .from('redacoes')
+            .update(redacaoData)
+            .eq('id', editingRedacao.id)
+            .select()
+            .single();
+        
+        if (error) {
+            showToast(`Erro ao atualizar tema: ${error.message}`, 'error');
+        } else if (data) {
+            setRedacoes(redacoes.map(r => r.id === editingRedacao.id ? data : r));
+            showToast('Tema atualizado com sucesso!', 'success');
+        }
+
+    } else {
+        const { data, error } = await supabase
+            .from('redacoes')
+            .insert(redacaoData)
+            .select()
+            .single();
+
+        if (error) {
+            showToast(`Erro ao adicionar tema: ${error.message}`, 'error');
+        } else if (data) {
+            setRedacoes([...redacoes, data]);
+            showToast('Tema adicionado com sucesso!', 'success');
+        }
     }
 
     setIsModalOpen(false);
@@ -56,10 +78,19 @@ export const RedacoesPage: React.FC<RedacoesPageProps> = ({ redacoes, setRedacoe
     setEditingRedacao(null);
   };
   
-  const handleDelete = (redacaoId: string) => {
+  const handleDelete = async (redacaoId: string) => {
     if (window.confirm('Tem certeza que deseja excluir este tema de redação?')) {
-        setRedacoes(redacoes.filter(r => r.id !== redacaoId));
-        showToast('Tema excluído com sucesso!', 'success');
+        const { error } = await supabase
+            .from('redacoes')
+            .delete()
+            .eq('id', redacaoId);
+        
+        if (error) {
+            showToast(`Erro ao excluir tema: ${error.message}`, 'error');
+        } else {
+            setRedacoes(redacoes.filter(r => r.id !== redacaoId));
+            showToast('Tema excluído com sucesso!', 'success');
+        }
     }
   };
 
